@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="LockCoverView">
+            <connections>
+                <outlet property="background" destination="pFI-so-x5l" id="3fj-Fg-EGH"/>
+                <outlet property="cancelButton" destination="byy-Ej-VQ7" id="OhA-uM-Osf"/>
+                <outlet property="contentView" destination="iN0-l3-epB" id="Z4H-vn-jqN"/>
+                <outlet property="learnMoreButton" destination="jo9-Y1-ace" id="aP0-tw-mP7"/>
+                <outlet property="title" destination="xCP-Zb-JBl" id="w6E-bJ-3MU"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view alpha="0.80000000000000004" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pFI-so-x5l" customClass="UIControl">
+                    <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                </view>
+                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" alignment="center" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="ZcK-sb-mrE">
+                    <rect key="frame" x="24" y="272" width="327" height="144"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="xCP-Zb-JBl">
+                            <rect key="frame" x="0.0" y="0.0" width="327" height="42"/>
+                            <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="0.0" maxY="24"/>
+                            <state key="normal" title="This is a premium emoji pack, click the button below to learn more.                                                      ">
+                                <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </state>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jo9-Y1-ace">
+                            <rect key="frame" x="12" y="54" width="303" height="48"/>
+                            <color key="backgroundColor" red="1" green="0.0" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="48" id="qYP-7f-8KU"/>
+                            </constraints>
+                            <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <state key="normal" title="Learn More"/>
+                        </button>
+                        <button opaque="NO" alpha="0.80000000000000004" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="byy-Ej-VQ7">
+                            <rect key="frame" x="139.5" y="114" width="48" height="30"/>
+                            <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <state key="normal" title="Cancel"/>
+                        </button>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="jo9-Y1-ace" firstAttribute="leading" secondItem="ZcK-sb-mrE" secondAttribute="leading" constant="12" id="Zox-3T-AJ2"/>
+                        <constraint firstAttribute="trailing" secondItem="jo9-Y1-ace" secondAttribute="trailing" constant="12" id="tYh-92-fpH"/>
+                    </constraints>
+                </stackView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="pFI-so-x5l" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="1uY-bY-fS1"/>
+                <constraint firstItem="ZcK-sb-mrE" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="24" id="1ve-Hg-8LX"/>
+                <constraint firstItem="pFI-so-x5l" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" id="3NC-27-T7b"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="ZcK-sb-mrE" secondAttribute="trailing" constant="24" id="Hse-RV-6k2"/>
+                <constraint firstItem="ZcK-sb-mrE" firstAttribute="centerY" secondItem="vUN-kp-3ea" secondAttribute="centerY" id="aOJ-P4-ELQ"/>
+                <constraint firstItem="pFI-so-x5l" firstAttribute="bottom" secondItem="vUN-kp-3ea" secondAttribute="bottom" id="he1-SV-1V3"/>
+                <constraint firstItem="pFI-so-x5l" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" id="lMt-Kd-cpY"/>
+            </constraints>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+        </view>
+    </objects>
+</document>

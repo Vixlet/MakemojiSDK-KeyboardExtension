@@ -13,11 +13,19 @@
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+        self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30*6/4, 30*6/4)];
         self.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin;
         [self.imageView setContentMode:UIViewContentModeScaleAspectFit];
         self.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:self.imageView];
+
+        self.lockView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30*6/4, 30*6/4)];
+        self.lockView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin;
+        self.lockView.center = self.contentView.center;
+       [self.lockView setImage:[UIImage imageNamed:@"categoryLockedLite"]];
+//        [self.lockView setContentMode:UIViewContentModeScaleAspectFill];
+        [self.contentView addSubview:self.lockView];
+
     }
     return self;
 }
@@ -29,6 +37,10 @@
 
 -(void)prepareForReuse {
     self.imageView.image = nil;
+}
+
+- (void)setLocked:(BOOL)locked {
+    self.lockView.hidden = !locked;
 }
 
 @end

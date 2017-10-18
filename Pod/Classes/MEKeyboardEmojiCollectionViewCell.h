@@ -10,4 +10,6 @@
 
 @interface MEKeyboardEmojiCollectionViewCell : UICollectionViewCell
 @property (nonatomic, retain)  UIImageView * imageView;
+@property (nonatomic, retain)  UIImageView * lockView;
+-(void) setLocked:(BOOL) locked;
 @end

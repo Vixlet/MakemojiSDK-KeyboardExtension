@@ -12,14 +12,15 @@
 #import "MEKeyboardEmojiCollectionViewCell.h"
 #import "MEKeyboardGifCollectionViewCell.h"
 #import "MEKeyboardVideoCollectionViewCell.h"
-#import <SDWebImage/UIImageView+WebCache.h>
+#import "SDWebImage/UIImageView+WebCache.h"
 #import <ImageIO/ImageIO.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "UIImage+Tint.h"
 #import <SDWebImage/SDWebImageManager.h>
 #import <SDWebImage/SDWebImagePrefetcher.h>
 #import "MEKeyboardReusableHeaderView.h"
-
+#import "Analytics.h"
+#import "LockCoverView.h"
 @interface MEKeyboardViewController ()
 
 @property (nonatomic, strong) UIButton *emptyView;
@@ -54,8 +55,8 @@
         self.currentHeight = 191;
         self.ignoreScrollSelection = NO;
         self.shareText = @"";
-        self.emojiInnerSize = CGSizeMake(61.44, 61.44);
-        self.outputSize = CGSizeMake(71.44, 71.44);
+        self.emojiInnerSize = CGSizeMake(500, 500);
+        self.outputSize = CGSizeMake(600, 600);
         self.navigationCellClass = @"MEKeyboardNavigationCollectionViewCell";
         self.mainBackgroundColor = [UIColor colorWithRed:0.925 green:0.933 blue:0.945 alpha:1];
         self.displayVideoCollection = NO;
@@ -71,8 +72,101 @@
     return self;
 }
 
+
+- (void)updateLockConstraints: (UIView *)parentView child:(UIView *)childView
+{
+//    [super updateViewConstraints];
+    [parentView addConstraint:[NSLayoutConstraint constraintWithItem:childView
+                                                          attribute:NSLayoutAttributeTop
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self.view
+                                                          attribute:NSLayoutAttributeTop
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+
+    [parentView addConstraint:[NSLayoutConstraint constraintWithItem:childView
+                                                          attribute:NSLayoutAttributeLeading
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self.view
+                                                          attribute:NSLayoutAttributeLeading
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+
+    [parentView addConstraint:[NSLayoutConstraint constraintWithItem:childView
+                                                          attribute:NSLayoutAttributeBottom
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self.view
+                                                          attribute:NSLayoutAttributeBottom
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+
+    [parentView addConstraint:[NSLayoutConstraint constraintWithItem:childView
+                                                          attribute:NSLayoutAttributeTrailing
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self.view
+                                                          attribute:NSLayoutAttributeTrailing
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+}
+
+-(void)cancelLockView {
+    [UIView transitionWithView:self.lockView
+                      duration:0.2
+                       options:UIViewAnimationOptionTransitionCrossDissolve
+                    animations:^{
+                            self.lockView.hidden = YES;
+                    }
+                    completion:NULL];
+
+}
+
+
+-(void)lockLearnMorePressed {
+    [self cancelLockView];
+    if([self.lastSharedEmoji objectForKey:@"category"]) {
+        [self sendToStore: [self.lastSharedEmoji objectForKey:@"category"]];
+    }
+}
+
+-(void)loadLockView
+{
+    if( self.brandColor != nil) {
+        self.lockView.learnMoreButton.backgroundColor = self.brandColor;
+    }
+    [UIView transitionWithView:self.lockView
+                      duration:0.2
+                       options:UIViewAnimationOptionTransitionCrossDissolve
+                    animations:^{
+                        self.lockView.hidden = NO;
+                    }
+                    completion:NULL];
+
+}
+
+
+
+-(void) sendToStore: (NSString *)category  {
+    UIResponder *responder = self;
+    while(responder){
+        if ([responder respondsToSelector: @selector(openURL:)]){
+             NSString *urlscheme = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"urlscheme"];;
+
+            NSString* encodedCategory = [category stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+            NSString * url = [NSString stringWithFormat:@"%1$@://vixlet/purchase/%2$@", urlscheme, encodedCategory];
+            [responder performSelector: @selector(openURL:) withObject: [NSURL URLWithString:url ]];
+        }
+        responder = [responder nextResponder];
+    }
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+
+    self.lockView = [[LockCoverView alloc]initWithFrame:self.inputView.frame];
+
+    self.lockView.hidden = YES;
+
+
     [[SDImageCache sharedImageCache] setMaxMemoryCountLimit:2];
     [[SDWebImageDownloader sharedDownloader] setExecutionOrder:SDWebImageDownloaderLIFOExecutionOrder];
     [[AFNetworkReachabilityManager sharedManager] startMonitoring];
@@ -110,7 +204,7 @@
     self.nextKeyboardButton.titleLabel.textColor = [UIColor colorWithRed:0.34 green:0.36 blue:0.39 alpha:1];
     [self.nextKeyboardButton setTitleColor:[UIColor colorWithRed:0.34 green:0.36 blue:0.39 alpha:1] forState:UIControlStateNormal];
 
-    [self.nextKeyboardButton setImage:[UIImage imageNamed:@"MakemojiSDK-KeyboardExtension.bundle/MEGlobeButton" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil] forState:UIControlStateNormal];
+    [self.nextKeyboardButton setImage:[UIImage imageNamed:@"MEGlobeButton"] forState:UIControlStateNormal];
     //[self.nextKeyboardButton setImageEdgeInsets:UIEdgeInsetsMake(4, 4, 4, 4)];
     [self.nextKeyboardButton addTarget:self action:@selector(advanceToNextInputMode) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.nextKeyboardButton];
@@ -134,7 +228,7 @@
     CGRect frame = [[UIScreen mainScreen] bounds];
     
     UICollectionViewFlowLayout * newLayout2 = [[UICollectionViewFlowLayout alloc] init];
-    newLayout2.itemSize = CGSizeMake(frame.size.width/8,34);
+    newLayout2.itemSize = CGSizeMake(frame.size.width/8*6/4,34*6/4);
     [newLayout2 setScrollDirection:UICollectionViewScrollDirectionHorizontal];
     newLayout2.minimumInteritemSpacing = 0;
     newLayout2.minimumLineSpacing = 0;
@@ -190,7 +284,7 @@
     self.backspaceButton = [UIButton buttonWithType:UIButtonTypeCustom];
     
     
-    [self.backspaceButton setImage:[[UIImage imageNamed:@"MakemojiSDK-KeyboardExtension.bundle/MEDeleteBackwardsButtonLarge" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
+    [self.backspaceButton setImage:[UIImage imageNamed:@"MEDeleteBackwardsButtonLarge"] forState:UIControlStateNormal];
     [self.backspaceButton addTarget:self action:@selector(deleteButtonTapped) forControlEvents:UIControlEventTouchDown];
     [self.backspaceButton addTarget:self action:@selector(deleteButtonRelease) forControlEvents:UIControlEventTouchUpInside];
     [self.backspaceButton.imageView setTintColor:[UIColor colorWithRed:0.309 green:0.33 blue:0.364 alpha:1]];
@@ -294,6 +388,15 @@
 
     [[MEKeyboardAPIManager client] beginImageViewSessionWithTag:@"3pk"];
     
+    
+    self.lockView = [[LockCoverView alloc]initWithFrame:self.inputView.frame];
+    [self.lockView.cancelButton addTarget:self action:@selector(cancelLockView) forControlEvents:UIControlEventTouchUpInside];
+    [self.lockView.background addTarget:self action:@selector(cancelLockView) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.lockView.learnMoreButton addTarget:self action:@selector(lockLearnMorePressed) forControlEvents:UIControlEventTouchUpInside];
+    self.lockView.hidden = YES;
+    [self.view addSubview:self.lockView];
+    
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
@@ -329,7 +432,7 @@
         [header.sectionLabel sizeToFit];
         return header;
     }
-    
+
     return reusableview;
 }
 
@@ -444,6 +547,9 @@
 }
 
 -(void)shareKeyboard {
+    [[SEGAnalytics sharedAnalytics] track:@"EXTENSION:SHARE:CLICKED"
+                               properties:@{ @"extension_type": @"ios_keyboard"}];
+
     [self trackShareWithEmojiId:@"0"];
     [self.textDocumentProxy insertText:self.shareText];
 }
@@ -555,6 +661,8 @@
     self.backspaceButton.frame = CGRectMake(self.navigationCollectionView.frame.size.width+self.navigationCollectionView.frame.origin.x+5, self.currentHeight-29, 24, 18);
     
     [self.emojiCollectionView setFrame:CGRectMake(0, 0, size.width, self.currentHeight-36)];
+
+    [self.lockView setFrame:CGRectMake(0, 0, size.width, self.currentHeight)];
     
     [self.searchCollectionView setFrame:CGRectMake(0, 8, size.width, 36)];
     
@@ -597,6 +705,7 @@
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [self setupConstraint];
+
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -639,16 +748,22 @@
             } else {
                 url = [NSURL URLWithString:[dict objectForKey:@"image_url"]];
             }
-            
+
             
             if ([[dict objectForKey:@"gif"] boolValue] == YES && [dict objectForKey:@"40x40_url"]) {
-                [emojiCell.imageView sd_setImageWithURL:[self urlForPath:[dict objectForKey:@"40x40_url"]] placeholderImage:[UIImage imageNamed:@"MakemojiSDK-KeyboardExtension.bundle/emojiplaceholder" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil]];
+                [emojiCell.imageView sd_setImageWithURL:[self urlForPath:[dict objectForKey:@"40x40_url"]] placeholderImage:[UIImage imageNamed:@"emojiplaceholder"]];
                 
             } else {
                 NSString * imageUrl = [[dict objectForKey:@"image_url"] stringByReplacingOccurrencesOfString:@"-256" withString:@""];
                 imageUrl = [imageUrl stringByReplacingOccurrencesOfString:@"@2x.png" withString:@"-large@2x.png"];
-                [emojiCell.imageView sd_setImageWithURL:[self urlForPath:imageUrl] placeholderImage:[UIImage imageNamed:@"MakemojiSDK-KeyboardExtension.bundle/emojiplaceholder" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil] options:SDWebImageHighPriority completed:nil];
+                [emojiCell.imageView sd_setImageWithURL:[self urlForPath:imageUrl] placeholderImage:[UIImage imageNamed:@"emojiplaceholder"] options:SDWebImageHighPriority completed:nil];
                 
+            }
+
+            if ([dict valueForKey:@"category_id"] && [self isCategoryLocked:[dict valueForKey:@"category_id"]]){
+                [emojiCell setLocked: YES];
+            } else {
+                [emojiCell setLocked: NO];
             }
 
         }
@@ -672,9 +787,24 @@
 }
 
 -(BOOL)isCategoryLocked:(NSString *)categoryName {
-    for (NSDictionary * cat in self.categories) {
-        if ([cat objectForKey:@"locked"] && [[cat objectForKey:@"locked"] boolValue] == YES && [[cat objectForKey:@"name"] isEqualToString:categoryName]) {
-            return YES;
+    if([NSNull null] != categoryName) {
+        NSInteger categoryId = [categoryName integerValue];
+        if (self.unlockedCategories && [self.unlockedCategories containsObject: categoryName]){
+            return NO;
+        }
+        for (NSDictionary * cat in self.categories) {
+            NSString* compareName = [cat objectForKey:@"name"];
+            NSInteger compareId = [cat[@"id"] integerValue];
+            if(compareName){
+                if ([cat objectForKey:@"locked"] && [[cat objectForKey:@"locked"] boolValue] == YES) {
+                    if ([[cat objectForKey:@"name"] isEqualToString:categoryName]) {
+                        return ![self.unlockedCategories containsObject: categoryName];
+                    }
+                    if (categoryId > 0 && compareId > 0 && categoryId == compareId) {
+                        return ![self.unlockedCategories containsObject: compareName];
+                    }
+                }
+            }
         }
     }
     return NO;
@@ -691,8 +821,13 @@
         if ([imageName isEqualToString:@"MEKeyboard-keyboard"]) {
             imageName = self.keyboardImageName;
         }
+        if([dict objectForKey:@"name"] && [self isCategoryLocked: [dict objectForKey:@"name"]]){
+            [photoCell setLocked: YES];
+        } else {
+            [photoCell setLocked: NO];
+        }
         
-        UIImage * catImage = [UIImage imageNamed:[NSString stringWithFormat:@"MakemojiSDK-KeyboardExtension.bundle/%@", imageName] inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil];
+        UIImage * catImage = [UIImage imageNamed:imageName];
         
         photoCell.imageView.image = nil;
         
@@ -722,38 +857,20 @@
         emojiCell.previewImage.image = nil;
         emojiCell.emojiLabel.text = [dict objectForKey:@"name"];
         emojiCell.emojiLabel.textColor = [UIColor blackColor];
-        [emojiCell.previewImage sd_setImageWithURL:[self urlForPath:[dict objectForKey:@"image_url"]] placeholderImage:[UIImage imageNamed:@"MakemojiSDK-KeyboardExtension.bundle/emojiplaceholder" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil]];
+        [emojiCell.previewImage sd_setImageWithURL:[self urlForPath:[dict objectForKey:@"image_url"]] placeholderImage:[UIImage imageNamed:@"emojiplaceholder"]];
         return emojiCell;
     }
     
     if ([[catDict objectForKey:@"gif"] boolValue] == YES) {
         MEKeyboardGifCollectionViewCell * emojiCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"EmojiGif" forIndexPath:indexPath];
         emojiCell.imageView.image = nil;
-        [emojiCell.imageView sd_setImageWithURL:[self urlForPath:[dict objectForKey:@"image_url"]] placeholderImage:[UIImage imageNamed:@"MakemojiSDK-KeyboardExtension.bundle/emojiplaceholder" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil]];
+        [emojiCell.imageView sd_setImageWithURL:[self urlForPath:[dict objectForKey:@"image_url"]] placeholderImage:[UIImage imageNamed:@"emojiplaceholder"]];
         
         return emojiCell;
     }
 
     MEKeyboardEmojiCollectionViewCell * emojiCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"Emoji" forIndexPath:indexPath];
-//    NSString * imageUrl;
-//    NSURL * url;
-//    if (![[dict objectForKey:@"image_url"] hasPrefix:@"https://"]) {
-//       url = [NSURL fileURLWithPath:[[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:[dict objectForKey:@"image_url"]]];
-//    } else {
-//        url = [NSURL URLWithString:[dict objectForKey:@"image_url"]];
-//    }
-//
-//    
-//    if ([[dict objectForKey:@"gif"] boolValue] == YES && [dict objectForKey:@"40x40_url"]) {
-//        [emojiCell.imageView sd_setImageWithURL:[self urlForPath:[dict objectForKey:@"40x40_url"]] placeholderImage:[UIImage imageNamed:@"emojiplaceholder"]];
-//    } else {
-//
-//        
-//        NSString * imageUrl = [[dict objectForKey:@"image_url"] stringByReplacingOccurrencesOfString:@"-256" withString:@""];
-//        imageUrl = [imageUrl stringByReplacingOccurrencesOfString:@"@2x.png" withString:@"-large@2x.png"];
-//        [emojiCell.imageView sd_setImageWithURL:[self urlForPath:imageUrl] placeholderImage:[UIImage imageNamed:@"emojiplaceholder"] options:SDWebImageHighPriority completed:nil];
-//
-//    }
+
     return emojiCell;
     
 }
@@ -761,12 +878,22 @@
 
 -(void)shareEmojiWithDictionary:(NSDictionary *)emojiDict {
     emojiDict = self.lastSharedEmoji;
+
+
     NSString * path = [[SDImageCache sharedImageCache] defaultCachePathForKey:[[self urlForPath:[emojiDict objectForKey:@"image_url"]] absoluteString]];
     NSLog(@"got to share", path);
     if (![[emojiDict objectForKey:@"image_url"] hasPrefix:@"https://"]) {
         path = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent:[emojiDict objectForKey:@"image_url"]];
     }
-    
+
+    [[SEGAnalytics sharedAnalytics] track:@"EXTENSION:EMOJI_ITEM:CLICKED"
+                               properties:@{ @"emoji_id": [emojiDict objectForKey:@"id"], @"extension_type": @"ios_keyboard"}];
+
+    if([emojiDict objectForKey:@"category"] && [self isCategoryLocked: [emojiDict objectForKey:@"category"]]){
+        [self loadLockView];
+        return;
+    }
+
     if ([emojiDict objectForKey:@"video"] != nil && [[emojiDict objectForKey:@"video"] boolValue] == YES) {
         
         NSURL *URL = [NSURL URLWithString:[emojiDict objectForKey:@"video_url"]];
@@ -938,7 +1065,7 @@
         return;
     }
     
-     NSDictionary * emojiDict;
+     NSMutableDictionary * emojiDict;
     __weak MEKeyboardViewController * weakSelf = self;
     
     if (collectionView == self.searchCollectionView) {
@@ -946,21 +1073,31 @@
     } else {
         emojiDict = [[self selectedCategoryDataForSection:indexPath.section] objectAtIndex:indexPath.row];
     }
-    self.lastSharedEmoji = emojiDict;
+    NSMutableDictionary *blendedDict = [NSMutableDictionary dictionaryWithDictionary:emojiDict];
+
+    NSDictionary* category = [self.categories objectAtIndex:indexPath.section];
+    if(category[@"locked"]){
+        blendedDict[@"locked"] = category[@"locked"];
+    }
+    if(category[@"name"]){
+        blendedDict[@"category"] = category[@"name"];
+    }
+    self.lastSharedEmoji = blendedDict;
+
     
     //NSLog(@"share");
-    
-    if ([[SDImageCache sharedImageCache] imageFromCacheForKey:[[self urlForPath:[emojiDict objectForKey:@"image_url"]] absoluteString]]) {
+
+    if ([[SDImageCache sharedImageCache] imageFromCacheForKey:[[self urlForPath:[blendedDict objectForKey:@"image_url"]] absoluteString]]) {
         //NSLog(@"shared from cache");
-        [self shareEmojiWithDictionary:emojiDict];
+        [self shareEmojiWithDictionary:blendedDict];
         return;
     }
     
     //NSLog(@"cache miss");
     
-    [[SDWebImageDownloader sharedDownloader] downloadImageWithURL:[self urlForPath:[emojiDict objectForKey:@"image_url"]] options:SDWebImageDownloaderHighPriority progress:nil completed:^(UIImage *image, NSData *data, NSError *error, BOOL finished) {
+    [[SDWebImageDownloader sharedDownloader] downloadImageWithURL:[self urlForPath:[blendedDict objectForKey:@"image_url"]] options:SDWebImageDownloaderHighPriority progress:nil completed:^(UIImage *image, NSData *data, NSError *error, BOOL finished) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self shareEmojiWithDictionary:emojiDict];
+            [self shareEmojiWithDictionary:blendedDict];
         });
 
     }];
@@ -1000,7 +1137,7 @@
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
     if (collectionView == self.navigationCollectionView) {
-        return CGSizeMake(30,30);
+        return CGSizeMake(40,30);
     }
     
     CGRect frame = [[UIScreen mainScreen] bounds];
@@ -1022,7 +1159,7 @@
     CGFloat width = frame.size.width;
     if (width > frame.size.height) { width = frame.size.height; }
     
-    return CGSizeMake(width/8,34);
+    return CGSizeMake(width/8 * 6/4,34*6/4);
 }
 
 

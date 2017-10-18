@@ -10,4 +10,6 @@
 
 @interface MEKeyboardNavigationCollectionViewCell : UICollectionViewCell
 @property UIImageView * imageView;
+@property UIImageView * lockView;
+-(void) setLocked:(BOOL) locked;
 @end

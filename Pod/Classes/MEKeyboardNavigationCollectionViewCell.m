@@ -15,14 +15,26 @@
     if (self) {
         self.contentView.clipsToBounds = YES;
         self.contentView.layer.cornerRadius = 15;
-        self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+        self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
         self.imageView.center = self.contentView.center;
+        self.lockView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+        self.lockView.center = self.contentView.center;
+
+
+
+        [self.lockView setImage:[UIImage imageNamed:@"categoryLockedLite"]];
+        [self.lockView setContentMode:UIViewContentModeScaleAspectFill];
+
         [self.imageView setImage:[UIImage imageNamed:@"defaultnavicon"]];
         [self.imageView setContentMode:UIViewContentModeScaleAspectFit];
         self.imageView.alpha = 0.70;
         [self.contentView addSubview:self.imageView];
+        [self.contentView addSubview:self.lockView];
     }
     return self;
+}
+- (void)setLocked:(BOOL)locked {
+    self.lockView.hidden = !locked;
 }
 
 - (void)setSelected:(BOOL)selected {

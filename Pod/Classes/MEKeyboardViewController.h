@@ -8,11 +8,13 @@
 
 #import <UIKit/UIKit.h>
 #import "MEKeyboardNativeView.h"
+#import "LockCoverView.h"
 
 @interface MEKeyboardViewController : UIInputViewController <UICollectionViewDataSource, UICollectionViewDelegate, MEKeyboardNativeViewDelegate>
 
 @property UICollectionView * navigationCollectionView;
 @property UICollectionView * emojiCollectionView;
+@property LockCoverView * lockView;
 @property UICollectionView * searchCollectionView;
 @property UILabel * sectionLabel;
 @property UIButton * shareButton;
@@ -22,6 +24,8 @@
 @property UIImageView * alertImageView;
 @property MEKeyboardNativeView * keyboardView;
 @property NSString * shareText;
+@property UIColor * brandColor;
+@property NSArray * unlockedCategories;
 @property CGSize outputSize;
 @property CGSize emojiInnerSize;
 @property NSMutableArray * categories;
@@ -33,6 +37,7 @@
 @property BOOL enableUpdates;
 @property BOOL enableTrending;
 @property BOOL enableUsed;
+
 @property NSString * keyboardImageName;
 @property BOOL disableNavScrolling;
 @property NSMutableDictionary * allEmoji;
